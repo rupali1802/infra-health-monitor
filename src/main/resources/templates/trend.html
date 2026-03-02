@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Asset Trend Analysis</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, #0f172a, #1e293b);
+            color: white;
+            min-height: 100vh;
+            padding: 40px;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 40px;
+        }
+
+        .title {
+            font-size: 26px;
+            font-weight: 600;
+            background: linear-gradient(90deg, #00f5ff, #4f46e5, #9333ea);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .back-btn {
+            padding: 10px 18px;
+            border-radius: 10px;
+            border: none;
+            background: #2563eb;
+            color: white;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+
+        .back-btn:hover {
+            transform: scale(1.05);
+        }
+
+        .card {
+            background: rgba(255,255,255,0.05);
+            padding: 30px;
+            border-radius: 20px;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 15px 40px rgba(0,0,0,0.6);
+        }
+
+        canvas {
+            margin-top: 20px;
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="header">
+    <div class="title">
+        Trend Analysis – <span th:text="${assetName}"></span>
+    </div>
+    <button class="back-btn" onclick="window.location.href='/dashboard'">
+        ← Back
+    </button>
+</div>
+
+<div class="card">
+    <canvas id="trendChart"></canvas>
+</div>
+
+<!-- Hidden Data for JS -->
+<div style="display:none;">
+    <ul id="timestamps">
+        <li th:each="h : ${history}" th:text="${h.timestamp}"></li>
+    </ul>
+    <ul id="temps">
+        <li th:each="h : ${history}" th:text="${h.temperature}"></li>
+    </ul>
+    <ul id="vibs">
+        <li th:each="h : ${history}" th:text="${h.vibration}"></li>
+    </ul>
+    <ul id="press">
+        <li th:each="h : ${history}" th:text="${h.pressure}"></li>
+    </ul>
+</div>
+
+<script>
+
+    function extractData(id) {
+        let items = document.querySelectorAll("#" + id + " li");
+        let arr = [];
+        items.forEach(function(el) {
+            arr.push(el.innerText);
+        });
+        return arr;
+    }
+
+    let labels = extractData("timestamps");
+    let tempData = extractData("temps");
+    let vibData = extractData("vibs");
+    let presData = extractData("press");
+
+    const ctx = document.getElementById('trendChart').getContext('2d');
+
+    new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: labels,
+            datasets: [
+                {
+                    label: 'Temperature',
+                    data: tempData,
+                    borderColor: '#ef4444',
+                    backgroundColor: 'rgba(239,68,68,0.2)',
+                    tension: 0.4
+                },
+                {
+                    label: 'Vibration',
+                    data: vibData,
+                    borderColor: '#f59e0b',
+                    backgroundColor: 'rgba(245,158,11,0.2)',
+                    tension: 0.4
+                },
+                {
+                    label: 'Pressure',
+                    data: presData,
+                    borderColor: '#3b82f6',
+                    backgroundColor: 'rgba(59,130,246,0.2)',
+                    tension: 0.4
+                }
+            ]
+        },
+        options: {
+            responsive: true,
+            animation: {
+                duration: 1200
+            },
+            plugins: {
+                legend: {
+                    labels: { color: 'white' }
+                }
+            },
+            scales: {
+                x: {
+                    ticks: { color: 'white' }
+                },
+                y: {
+                    ticks: { color: 'white' }
+                }
+            }
+        }
+    });
+
+</script>
+
+</body>
+</html>

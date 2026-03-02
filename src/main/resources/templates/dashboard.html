@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>AI Infrastructure Control Center</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <style>
+
+        *{
+            margin:0;
+            padding:0;
+            box-sizing:border-box;
+            font-family:'Poppins',sans-serif;
+        }
+
+        body{
+            min-height:100vh;
+            background:#0f172a;
+            color:white;
+        }
+
+        .container{
+            padding:30px;
+        }
+
+        header{
+            display:flex;
+            justify-content:space-between;
+            align-items:center;
+            margin-bottom:25px;
+        }
+
+        .title{
+            font-size:26px;
+            font-weight:700;
+            background:linear-gradient(90deg,#00f5ff,#4f46e5,#9333ea);
+            -webkit-background-clip:text;
+            -webkit-text-fill-color:transparent;
+        }
+
+        .header-right{
+            display:flex;
+            align-items:center;
+            gap:15px;
+        }
+
+        .clock{
+            font-size:13px;
+            opacity:0.8;
+        }
+
+        .btn{
+            padding:8px 16px;
+            border:none;
+            border-radius:8px;
+            cursor:pointer;
+            font-weight:500;
+            color:white;
+            transition:0.3s;
+            text-decoration:none;
+        }
+
+        .sim-btn{ background:#2563eb; }
+        .stop-btn{ background:#dc2626; }
+        .add-btn{ background:#16a34a; }
+
+        .btn:hover{
+            transform:scale(1.05);
+        }
+
+        table{
+            width:100%;
+            border-collapse:collapse;
+            background:#1e293b;
+            border-radius:10px;
+            overflow:hidden;
+        }
+
+        th{
+            background:#334155;
+            padding:12px;
+            font-size:14px;
+        }
+
+        td{
+            padding:12px;
+            text-align:center;
+            font-size:13px;
+        }
+
+        tr:nth-child(even){
+            background:#1f2937;
+        }
+
+        .badge{
+            padding:4px 10px;
+            border-radius:20px;
+            font-size:11px;
+            font-weight:600;
+        }
+
+        .critical{ background:#dc2626; }
+        .warning{ background:#f59e0b; }
+        .healthy{ background:#16a34a; }
+
+        .progress-container{
+            width:100%;
+            background:#374151;
+            border-radius:20px;
+            height:18px;
+        }
+
+        .progress-bar{
+            height:18px;
+            border-radius:20px;
+            font-size:10px;
+            line-height:18px;
+            color:white;
+        }
+
+        /* Modal */
+
+        .modal{
+            display:none;
+            position:fixed;
+            top:0;
+            left:0;
+            width:100%;
+            height:100%;
+            background:rgba(0,0,0,0.8);
+            z-index:9999;
+            justify-content:center;
+            align-items:center;
+        }
+
+        .modal-content{
+            background:#1e293b;
+            width:70%;
+            max-width:900px;
+            padding:25px;
+            border-radius:12px;
+            position:relative;
+        }
+
+        .close{
+            position:absolute;
+            right:15px;
+            top:10px;
+            cursor:pointer;
+            font-size:20px;
+        }
+
+        @media(max-width:768px){
+            .modal-content{
+                width:95%;
+            }
+        }
+
+    </style>
+</head>
+
+<body>
+
+<div class="container">
+
+<header>
+    <div>
+        <div class="title">Smart Infrastructure Intelligence Platform</div>
+        <div class="clock" id="clock"></div>
+    </div>
+
+    <div class="header-right">
+        <a href="/add" class="btn add-btn">➕ Add Asset</a>
+        <button class="btn sim-btn" onclick="startSimulation()">▶ Start</button>
+        <button class="btn stop-btn" onclick="stopSimulation()">⏹ Stop</button>
+        <a href="/logout" class="btn stop-btn">Logout</a>
+    </div>
+</header>
+
+<table>
+    <thead>
+    <tr>
+        <th>Asset</th>
+        <th>Temperature</th>
+        <th>Health Score</th>
+        <th>Status</th>
+        <th>Failure Risk</th>
+        <th>Trend</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    <tr th:each="asset : ${assets}">
+        <td th:text="${asset.assetName}"></td>
+        <td th:text="${#numbers.formatDecimal(asset.temperature,1,2)}"></td>
+        <td th:text="${#numbers.formatDecimal(asset.healthScore,1,2)}"></td>
+
+        <td>
+            <span class="badge"
+                  th:text="${asset.status}"
+                  th:classappend="
+                  ${asset.status} == 'CRITICAL' ? ' critical' :
+                  (${asset.status} == 'WARNING' ? ' warning' : ' healthy')">
+            </span>
+        </td>
+
+        <td>
+            <div class="progress-container">
+                <div class="progress-bar"
+                     th:style="'width:' + ${asset.failureProbability} + '%; background-color:' +
+                     (${asset.failureProbability} > 70 ? '#dc2626' :
+                     (${asset.failureProbability} > 40 ? '#f59e0b' : '#16a34a'))"
+                     th:text="${#numbers.formatDecimal(asset.failureProbability,1,0)} + '%'">
+                </div>
+            </div>
+        </td>
+
+        <td>
+            <button class="btn sim-btn"
+                    th:attr="onclick=|openTrend('${asset.assetName}')|">
+                📊 View
+            </button>
+        </td>
+    </tr>
+    </tbody>
+</table>
+
+</div>
+
+<!-- Modal -->
+<div id="trendModal" class="modal">
+    <div class="modal-content">
+        <span class="close" onclick="closeTrend()">&times;</span>
+        <h3 id="trendTitle"></h3>
+        <canvas id="trendChart"></canvas>
+    </div>
+</div>
+
+<script>
+
+    function updateClock(){
+        document.getElementById("clock").innerText=new Date().toLocaleString();
+    }
+    setInterval(updateClock,1000);
+    updateClock();
+
+    let simulationInterval=null;
+
+    function startSimulation(){
+
+        if(simulationInterval!==null) return;
+
+        simulationInterval=setInterval(()=>{
+
+            fetch('/simulate')
+            .then(res=>{
+                if(!res.ok) throw new Error("Simulation failed");
+                return res.text();
+            })
+            .then(data=>{
+                console.log(data);
+                if(data==="Unauthorized"){
+                    alert("Session expired. Login again.");
+                    stopSimulation();
+                    return;
+                }
+                location.reload();
+            })
+            .catch(err=>{
+                console.error(err);
+                alert("Simulation error. Check backend.");
+                stopSimulation();
+            });
+
+        },3000);
+    }
+
+    function stopSimulation(){
+        clearInterval(simulationInterval);
+        simulationInterval=null;
+    }
+
+    // Auto Alert if critical exists
+    window.onload=function(){
+        let criticalFound=false;
+        document.querySelectorAll(".badge").forEach(b=>{
+            if(b.innerText.trim()==="CRITICAL"){
+                criticalFound=true;
+            }
+        });
+
+        if(criticalFound){
+            setTimeout(()=>{
+                alert("🚨 Critical Asset Detected!");
+            },500);
+        }
+    };
+
+    let trendChart;
+
+    function openTrend(assetName){
+
+        document.getElementById("trendModal").style.display="flex";
+        document.getElementById("trendTitle").innerText="Trend for "+assetName;
+
+        let labels=[];
+        let data=[];
+
+        for(let i=0;i<12;i++){
+            labels.push("T"+(i+1));
+            data.push(Math.floor(Math.random()*100));
+        }
+
+        if(trendChart) trendChart.destroy();
+
+        trendChart=new Chart(document.getElementById("trendChart"),{
+            type:'line',
+            data:{
+                labels:labels,
+                datasets:[{
+                    label:'Temperature',
+                    data:data,
+                    borderColor:'#00f5ff',
+                    backgroundColor:'rgba(0,245,255,0.2)',
+                    tension:0.4,
+                    fill:true
+                }]
+            }
+        });
+    }
+
+    function closeTrend(){
+        document.getElementById("trendModal").style.display="none";
+    }
+
+</script>
+
+</body>
+</html>

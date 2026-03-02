@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Add Infrastructure Asset</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <!-- Google Font -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+
+    <style>
+
+        *{
+            margin:0;
+            padding:0;
+            box-sizing:border-box;
+            font-family:'Poppins',sans-serif;
+        }
+
+        body{
+            min-height:100vh;
+            background:url('https://media.istockphoto.com/id/2148619547/vector/abstract-blue-glowing-energy-waves-from-dotted-line-particles-with-blur-effect-on-dark.jpg?s=612x612&w=0&k=20&c=cUqaP5jBGX37wzW7QCTDDtgetMJ8D98Pq5vYzT6Yuxk=') no-repeat center center/cover;
+            position:relative;
+            display:flex;
+            justify-content:center;
+            align-items:center;
+        }
+
+        body::before{
+            content:"";
+            position:absolute;
+            width:100%;
+            height:100%;
+            background:rgba(0,0,0,0.75);
+            backdrop-filter:blur(6px);
+            z-index:0;
+        }
+
+        .form-container{
+            position:relative;
+            z-index:1;
+            width:100%;
+            max-width:500px;
+            padding:40px;
+            background:rgba(255,255,255,0.08);
+            backdrop-filter:blur(15px);
+            border-radius:20px;
+            box-shadow:0 20px 60px rgba(0,0,0,0.6);
+            animation:fadeUp 0.8s ease;
+            color:white;
+        }
+
+        @keyframes fadeUp{
+            from{opacity:0; transform:translateY(40px);}
+            to{opacity:1; transform:translateY(0);}
+        }
+
+        h2{
+            text-align:center;
+            margin-bottom:25px;
+            font-weight:600;
+            background:linear-gradient(90deg,#00f5ff,#4f46e5,#9333ea);
+            -webkit-background-clip:text;
+            -webkit-text-fill-color:transparent;
+        }
+
+        label{
+            display:block;
+            margin-top:15px;
+            font-size:13px;
+            font-weight:500;
+        }
+
+        input{
+            width:100%;
+            padding:12px;
+            margin-top:6px;
+            border-radius:10px;
+            border:none;
+            outline:none;
+            font-size:14px;
+            background:rgba(255,255,255,0.15);
+            color:white;
+        }
+
+        input::placeholder{
+            color:rgba(255,255,255,0.6);
+        }
+
+        input:focus{
+            background:rgba(255,255,255,0.25);
+        }
+
+        .btn{
+            width:100%;
+            margin-top:25px;
+            padding:14px;
+            border:none;
+            border-radius:12px;
+            background:linear-gradient(45deg,#2563eb,#1e40af);
+            color:white;
+            font-weight:600;
+            cursor:pointer;
+            transition:0.3s;
+        }
+
+        .btn:hover{
+            transform:scale(1.05);
+            box-shadow:0 10px 30px rgba(37,99,235,0.6);
+        }
+
+        .back-link{
+            display:block;
+            text-align:center;
+            margin-top:18px;
+            text-decoration:none;
+            color:#cbd5e1;
+            font-size:13px;
+            transition:0.3s;
+        }
+
+        .back-link:hover{
+            color:white;
+        }
+
+        @media(max-width:600px){
+            .form-container{
+                margin:20px;
+                padding:25px;
+            }
+        }
+
+    </style>
+</head>
+
+<body>
+
+<div class="form-container">
+
+    <h2>Add Infrastructure Asset</h2>
+
+    <form th:action="@{/save}" th:object="${asset}" method="post">
+
+        <label>Asset Name</label>
+        <input type="text" th:field="*{assetName}" placeholder="Enter asset name" required>
+
+        <label>Location</label>
+        <input type="text" th:field="*{location}" placeholder="Enter location" required>
+
+        <label>Temperature (°C)</label>
+        <input type="number" step="0.1" th:field="*{temperature}" placeholder="Enter temperature" required>
+
+        <label>Vibration</label>
+        <input type="number" step="0.1" th:field="*{vibration}" placeholder="Enter vibration level" required>
+
+        <label>Pressure</label>
+        <input type="number" step="0.1" th:field="*{pressure}" placeholder="Enter pressure value" required>
+
+        <button type="submit" class="btn">Save Asset</button>
+
+    </form>
+
+    <a href="/dashboard" class="back-link">⬅ Back to Dashboard</a>
+
+</div>
+
+</body>
+</html>
