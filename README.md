@@ -23,3 +23,10 @@ It classifies assets into Healthy, Warning, or Critical states using anomaly det
 - Trend visualization
 
 Developed by Rupali – B.Tech AI & Data Science
+## Screenshots
+
+### Login Page
+![Login](LOGIN.png)
+
+### Dashboard
+![Dashboard](DASHBOARD.png)
